@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .search-container {
+            margin-top: 100px;
+            width: 100%;
+            max-width: 600px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        #searchInput {
+            width: 70%;
+            padding: 12px 20px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        #searchInput::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        #searchInput:focus {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+        }
+
+        button {
+            padding: 12px 30px;
+            margin-left: 10px;
+            border: none;
+            border-radius: 25px;
+            background: #4a90e2;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: #357abd;
+            transform: translateY(-2px);
+        }
+
+        #resultados {
+            width: 100%;
+            max-width: 800px;
+            margin-top: 40px;
+            padding: 20px;
+        }
+
+        .resultado {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .resultado:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .resultado h2 {
+            color: #4a90e2;
+            margin-bottom: 10px;
+        }
+
+        .resultado a {
+            color: #a8c7ed;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .resultado a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Ingrese su búsqueda" />
+        <button onclick="buscar()">Buscar</button>
+    </div>
+    <div id="resultados"></div>
+
+    <script>
+        async function buscar() {
+            const searchTerm = document.getElementById("searchInput").value;
+            const apiKey = ""; // Reemplaza con tu clave API
+            const url = `https://api.search.brave.com/app/v1/search?api_key=${apiKey}&q=${encodeURIComponent(searchTerm)}`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                mostrarResultados(data.results);
+            } catch (error) {
+                console.error("Error:", error);
+                document.getElementById("resultados").innerHTML = `
+                    <div class="resultado">
+                        <h2>Error</h2>
+                        <p>Hubo un error al realizar la búsqueda. Por favor, intenta nuevamente.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function mostrarResultados(results) {
+            const resultadosDiv = document.getElementById("resultados");
+            resultadosDiv.innerHTML = "";
+
+            if (!results || results.length === 0) {
+                resultadosDiv.innerHTML = `
+                    <div class="resultado">
+                        <h2>Sin resultados</h2>
+                        <p>No se encontraron resultados para tu búsqueda.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            results.forEach(result => {
+                const resultado = document.createElement("div");
+                resultado.className = "resultado";
+                resultado.innerHTML = `
+                    <h2>${result.title}</h2>
+                    <a href="${result.url}" target="_blank">${result.url}</a>
+                `;
+                resultadosDiv.appendChild(resultado);
+            });
+        }
+
+        // Permitir búsqueda con Enter
+        document.getElementById("searchInput").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                buscar();
+            }
+        });
+    </script>
+</body>
+</html>
